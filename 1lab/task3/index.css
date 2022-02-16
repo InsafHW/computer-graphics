@@ -1,0 +1,39 @@
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+svg {
+    width: 100vw;
+    height: 100vh;
+}
+
+svg text {
+    font-size: 8px;
+    cursor: pointer;
+}
+
+.firstStick {
+    transform: translateY(-19px);
+}
+
+.secondStick {
+    transform: rotate(-90deg) translateX(15px);
+}
+
+.letters {
+    display: flex;
+    position: absolute;
+    bottom: 0;
+    width: 90%;
+    padding-left: 90px;
+    padding-right: 10px;
+    font-size: 50px;
+    justify-content: space-between;
+}
+
+.letter {
+    cursor: pointer;
+}

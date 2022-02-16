@@ -1,0 +1,45 @@
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+svg {
+    width: 100vw;
+    height: 100vh;
+}
+
+#firstLetter {
+    transform: scale(0.6) translateY(140px) translateX(170px);
+    transition: all 1s ease;
+    fill: red;
+}
+
+#secondLetter {
+    transform: scale(0.6) translateY(140px) translateX(170px);
+    transition: all 1s ease;
+    fill: green;
+}
+
+#thirdLetter {
+    transform: scale(0.6) translateY(140px) translateX(170px);
+    transition: all 1s ease;
+    fill: aqua;
+}
+
+
+@keyframes letterMove {
+    0% {
+        transform: translateY(0%) scale(0.6) translateY(140px) translateX(170px);
+    }
+    33% {
+        transform: translateY(-35%) scale(0.6) translateY(140px) translateX(170px);
+    }
+    66% {
+        transform: translateY(35%) scale(0.6) translateY(140px) translateX(170px);
+    }
+    100% {
+        transform: translateY(0%) scale(0.6) translateY(140px) translateX(170px);
+    }
+}
