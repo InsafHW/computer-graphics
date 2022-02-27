@@ -30,20 +30,18 @@ export class SaveFileModal extends Modal {
         `
         super(content,
             () => {
+                const canvas = document.getElementById('canvas')
                 const radios = content.querySelectorAll('input')
                 radios.forEach(r => {
                     if (r.checked) {
-                        switch (r.id) {
-                            case PNG_ID:
-                                console.log('png')
-                                break
-                            case JPEG_ID:
-                                console.log('jpeg')
-                                break
-                            case BMP_ID:
-                                console.log('bmp')
-                                break
-                        }
+                        const dataURL = canvas.toDataURL('image/' + r.id)
+                        const a = document.createElement('a')
+                        a.download = `new-${Date.now()}.${r.id}`
+                        a.href = dataURL
+                        a.style.position = 'absolute'
+                        document.body.appendChild(a)
+                        a.click()
+                        document.body.removeChild(a)
                     }
                 })
             },
