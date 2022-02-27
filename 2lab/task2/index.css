@@ -37,3 +37,14 @@
 .upload-file::before {
     content: 'Select some files';
 }
+
+.canvas-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 54px);
+}
+
+.canvas-wrapper canvas {
+    border: 1px solid red;
+}
