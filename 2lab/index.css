@@ -1,0 +1,21 @@
+html,
+body {
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+
+#fileInput {
+    height: 30px;
+}
+
+#photoHolderWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: calc(100% - 30px);
+    user-select: none;
+}
