@@ -41,16 +41,20 @@ function initHandlers() {
         })
     }
 
-    fileInput.addEventListener('change', onFileInputChange)
-    document.body.addEventListener('click', () => dragging = false)
-    photo.addEventListener('mousedown', () => {
-        dragging = true
-        photo.style.cursor = 'grabbing'
-    })
-    photo.addEventListener('mouseup', () => {
+    const resetDragging = () => {
         dragging = false
         photo.style.cursor = 'initial'
-    })
+    }
+
+    const startDragging = () => {
+        dragging = true
+        photo.style.cursor = 'grabbing'
+    }
+
+    fileInput.addEventListener('change', onFileInputChange)
+    photo.addEventListener('mouseleave', resetDragging)
+    photo.addEventListener('mousedown', startDragging)
+    photo.addEventListener('mouseup', resetDragging)
     photo.addEventListener('mousemove', event => {
         if (dragging) {
             handlePhotoMove(event)
