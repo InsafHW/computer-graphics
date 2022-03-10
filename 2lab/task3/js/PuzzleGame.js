@@ -12,7 +12,8 @@ class PuzzleGame {
         this.photos = [
             './assets/images/photo1.jpg',
             './assets/images/photo2.jpg',
-            './assets/images/photo3.jpg'
+            './assets/images/photo3.jpg',
+            './assets/images/photo4.jpg'
         ]
         this.scale = 0.7
         this.size = {
@@ -91,7 +92,6 @@ class PuzzleGame {
         if (this.selectedPiece.isClose()) {
             this.selectedPiece.placeIntoRightPosition()
             this.popSound.play()
-            console.log(this.isComplete())
             if (this.isComplete()) {
                 this.winSound.play()
                 this.onSolvePuzzle()
@@ -172,11 +172,16 @@ class PuzzleGame {
         this.image = new Image()
 
         this.image.onload = () => {
-            const rows = this.size.rows * (this.currentLevel + 1)
-            const columns = this.size.columns * (this.currentLevel + 1)
+            let _rows = this.size.rows
+            let _columns = this.size.columns
+
+            if (this.currentLevel !== 0 && this.currentLevel % 3 === 0) {
+                _rows += 2
+                _columns += 2
+            }
 
             this.handleResize()
-            this.initializePieces(rows, columns)
+            this.initializePieces(_rows, _columns)
             this.randomizePieces()
             this.updateGame()
         }
