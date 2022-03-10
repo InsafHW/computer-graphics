@@ -37,6 +37,7 @@ class Piece {
     placeIntoRightPosition = () => {
         this.x = this.xCorrect
         this.y = this.yCorrect
+        this.correct = true
     }
 
     draw = (context, image) => {
@@ -63,12 +64,6 @@ class Piece {
         )
 
         return distance < this.width / 3
-    }
-
-    snap = () => {
-        this.x = this.xCorrect
-        this.y = this.yCorrect
-        this.correct = true
     }
 }
 

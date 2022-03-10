@@ -89,7 +89,7 @@ class PuzzleGame {
 
     onMouseUp = () => {
         if (this.selectedPiece.isClose()) {
-            this.selectedPiece.snap()
+            this.selectedPiece.placeIntoRightPosition()
             this.popSound.play()
             console.log(this.isComplete())
             if (this.isComplete()) {
