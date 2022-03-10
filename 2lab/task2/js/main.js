@@ -7,13 +7,13 @@ const saveBtn = document.getElementById('save-btn')
 const canvas = document.getElementById('canvas')
 const ctx = document.getElementById('canvas').getContext('2d')
 
-let drawing = false,
-    prevX = 0,
-    currX = 0,
-    prevY = 0,
-    currY = 0
-
 function initHandlers() {
+    let drawing = false,
+        prevX = 0,
+        currX = 0,
+        prevY = 0,
+        currY = 0
+
     const fileModal = new NewFileModal()
     const saveModal = new SaveFileModal()
 

@@ -14,9 +14,6 @@ body {
 }
 
 #photoHolderWrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     width: 100%;
     height: calc(100% - 30px);
     user-select: none;
