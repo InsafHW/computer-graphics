@@ -23,11 +23,12 @@ class PuzzleGame {
     currentLevel = 0
     image = null
 
-    constructor(canvas, solveBtn, shuffleBtn, newBtn) {
+    constructor(canvas, solveBtn, shuffleBtn, newBtn, refreshBtn) {
         this.canvas = canvas
         this.solveBtn = solveBtn
         this.shuffleBtn = shuffleBtn
         this.newBtn = newBtn
+        this.refreshBtn = refreshBtn
         this.context = this.canvas.getContext('2d')
     }
 
@@ -47,6 +48,43 @@ class PuzzleGame {
         return !this.pieces.some(p => !p.correct)
     }
 
+    showWinningModal = () => {
+        const modal = document.getElementById('modal')
+
+        const modalContainer = document.createElement('div')
+        const buttonContainer = document.createElement('div')
+        const refreshGameBtn = document.createElement('button')
+        const cancelBtn = document.createElement('button')
+        const text = document.createElement('p')
+
+        this.canvas.style.pointerEvents = 'none'
+        cancelBtn.innerText = 'No'
+        refreshGameBtn.innerText = 'Yes'
+        buttonContainer.appendChild(cancelBtn)
+        buttonContainer.appendChild(refreshGameBtn)
+        buttonContainer.className = 'modal-buttons-container'
+        text.innerText = 'You won the game! Do you want to start again?'
+        modalContainer.appendChild(text)
+        modalContainer.appendChild(buttonContainer)
+        modalContainer.className = 'modal-content'
+
+        cancelBtn.addEventListener('click', () => {
+            this.changeButtonAccessibility(this.shuffleBtn, false)
+            this.changeButtonAccessibility(this.solveBtn, false)
+            this.changeButtonAccessibility(this.newBtn, false)
+            modal.removeChild(modalContainer)
+            modal.classList.remove('visible')
+        })
+        refreshGameBtn.addEventListener('click', () => {
+            this.refreshGame()
+            modal.removeChild(modalContainer)
+            modal.classList.remove('visible')
+            this.canvas.style.pointerEvents = 'all'
+        })
+        modal.appendChild(modalContainer)
+        modal.classList.add('visible')
+    }
+
     onSolvePuzzle = () => {
         const isMorePhotos = this.currentLevel < this.photos.length - 1
         const timeout = 500
@@ -60,14 +98,15 @@ class PuzzleGame {
                         this.canvas.style.pointerEvents = 'none'
                     }
                 } else {
-                    alert('You won the whole game!')
-                    this.canvas.style.pointerEvents = 'none'
-                    this.changeButtonAccessibility(this.shuffleBtn, false)
-                    this.changeButtonAccessibility(this.solveBtn, false)
-                    this.changeButtonAccessibility(this.newBtn, false)
+                    this.showWinningModal()
                 }
             }, timeout)
         })
+    }
+
+    refreshGame = () => {
+        this.currentLevel = 0
+        this.image.src = this.photos[this.currentLevel]
     }
 
     onMouseDown = (event) => {
@@ -147,6 +186,7 @@ class PuzzleGame {
         this.solveBtn.addEventListener('click', this.solvePuzzle)
         this.shuffleBtn.addEventListener('click', this.randomizePieces)
         this.newBtn.addEventListener('click', this.changePuzzlePhoto)
+        this.refreshBtn.addEventListener('click', this.refreshGame)
     }
 
     handleResize = () => {

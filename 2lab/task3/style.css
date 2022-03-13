@@ -41,3 +41,39 @@ button:disabled {
     display: flex;
     flex-direction: column;
 }
+
+#modal {
+    pointer-events: none;
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+#modal.visible {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    pointer-events: all;
+    width: 400px;
+    min-height: 200px;
+    background-color: white;
+}
+
+.modal-content p {
+    text-align: center;
+}
+
+.modal-buttons-container {
+    display: flex;
+    justify-content: space-around;
+}
