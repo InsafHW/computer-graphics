@@ -8,7 +8,11 @@ class PuzzleGame {
         './assets/images/photo1.jpg',
         './assets/images/photo2.jpg',
         './assets/images/photo3.jpg',
-        './assets/images/photo4.jpg'
+        './assets/images/photo4.jpg',
+        './assets/images/photo5.jpg',
+        './assets/images/photo6.jpg',
+        './assets/images/photo7.jpg',
+        './assets/images/photo8.jpg'
     ]
     scale = 0.7
     size = {
@@ -22,6 +26,7 @@ class PuzzleGame {
     selectedPiece = null
     currentLevel = 0
     image = null
+    photoIndex = 0
 
     constructor(canvas, solveBtn, shuffleBtn, newBtn, refreshBtn) {
         this.canvas = canvas
@@ -69,9 +74,9 @@ class PuzzleGame {
         modalContainer.className = 'modal-content'
 
         cancelBtn.addEventListener('click', () => {
-            this.changeButtonAccessibility(this.shuffleBtn, false)
-            this.changeButtonAccessibility(this.solveBtn, false)
-            this.changeButtonAccessibility(this.newBtn, false)
+            this.changeButtonAccessibility(this.shuffleBtn, true)
+            this.changeButtonAccessibility(this.solveBtn, true)
+            this.changeButtonAccessibility(this.newBtn, true)
             modal.removeChild(modalContainer)
             modal.classList.remove('visible')
         })
@@ -93,7 +98,7 @@ class PuzzleGame {
                 alert('Congrats!')
                 if (isMorePhotos) {
                     if (confirm('Do you want to go to another level?')) {
-                        this.changePuzzlePhoto()
+                        this.changePuzzlePhoto(true)
                     } else {
                         this.canvas.style.pointerEvents = 'none'
                     }
@@ -105,8 +110,14 @@ class PuzzleGame {
     }
 
     refreshGame = () => {
+        this.photoIndex = 0
         this.currentLevel = 0
+        this.size.rows = 3
+        this.size.columns = 3
         this.image.src = this.photos[this.currentLevel]
+        this.changeButtonAccessibility(this.newBtn, true)
+        this.changeButtonAccessibility(this.shuffleBtn, true)
+        this.changeButtonAccessibility(this.solveBtn, true)
     }
 
     onMouseDown = (event) => {
@@ -164,13 +175,21 @@ class PuzzleGame {
     }
 
     changeButtonAccessibility = (button, state) => {
-        button.setAttribute('disabled', state)
+        const disable = !state
+        if (disable) {
+            button.setAttribute('disabled', true)
+        } else {
+            button.removeAttribute('disabled')
+        }
     }
 
-    changePuzzlePhoto = () => {
-        const isMorePhotos = this.currentLevel < this.photos.length - 1
+    changePuzzlePhoto = (needUpdateLevel = false) => {
+        needUpdateLevel && ++this.currentLevel
+        this.photoIndex++
+
+        const isMorePhotos = this.photoIndex < this.photos.length
         if (isMorePhotos) {
-            this.image.src = this.photos[++this.currentLevel]
+            this.image.src = this.photos[this.photoIndex]
         } else {
             alert('There is no more puzzles!')
             this.changeButtonAccessibility(this.newBtn, false)
@@ -185,7 +204,7 @@ class PuzzleGame {
         this.canvas.addEventListener('mouseup', this.onMouseUp)
         this.solveBtn.addEventListener('click', this.solvePuzzle)
         this.shuffleBtn.addEventListener('click', this.randomizePieces)
-        this.newBtn.addEventListener('click', this.changePuzzlePhoto)
+        this.newBtn.addEventListener('click', () => this.changePuzzlePhoto(false))
         this.refreshBtn.addEventListener('click', this.refreshGame)
     }
 
@@ -247,7 +266,7 @@ class PuzzleGame {
             this.randomizePieces()
         }
 
-        this.image.src = this.photos[this.currentLevel]
+        this.image.src = this.photos[this.photoIndex]
         this.updateGame()
     }
 }
