@@ -20,8 +20,10 @@ class PieceDrawer {
 }
 
 class Piece {
+    pieceDrawer = new PieceDrawer()
+    correct = true
+
     constructor(rowIndex, colIndex, size) {
-        this.pieceDrawer = new PieceDrawer()
         this.rowIndex = rowIndex
         this.colIndex = colIndex
         this.x = size.x + size.width * this.colIndex / size.columns
@@ -30,7 +32,6 @@ class Piece {
         this.height = size.height / size.rows
         this.xCorrect = this.x
         this.yCorrect = this.y
-        this.correct = true
         this.size = size
     }
 

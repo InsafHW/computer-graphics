@@ -1,32 +1,34 @@
 import {Piece} from './Piece.js'
 
 class PuzzleGame {
-    constructor(canvas, solveBtn, shuffleBtn) {
+    popSound = new Audio('./assets/sounds/pop.mp3')
+    winSound = new Audio('./assets/sounds/win.mp3')
+    pieces = []
+    photos = [
+        './assets/images/photo1.jpg',
+        './assets/images/photo2.jpg',
+        './assets/images/photo3.jpg',
+        './assets/images/photo4.jpg'
+    ]
+    scale = 0.7
+    size = {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+        rows: 3,
+        columns: 3
+    }
+    selectedPiece = null
+    currentLevel = 0
+    image = null
+
+    constructor(canvas, solveBtn, shuffleBtn, newBtn) {
         this.canvas = canvas
         this.solveBtn = solveBtn
         this.shuffleBtn = shuffleBtn
+        this.newBtn = newBtn
         this.context = this.canvas.getContext('2d')
-        this.pieces = []
-        this.popSound = new Audio('./assets/sounds/pop.mp3')
-        this.winSound = new Audio('./assets/sounds/win.mp3')
-        this.photos = [
-            './assets/images/photo1.jpg',
-            './assets/images/photo2.jpg',
-            './assets/images/photo3.jpg',
-            './assets/images/photo4.jpg'
-        ]
-        this.scale = 0.7
-        this.size = {
-            x: 0,
-            y: 0,
-            width: 0,
-            height: 0,
-            rows: 3,
-            columns: 3
-        }
-        this.selectedPiece = null
-        this.currentLevel = 0
-        this.image = null
     }
 
     getPressedPiece = (loc) => {
@@ -53,13 +55,16 @@ class PuzzleGame {
                 alert('Congrats!')
                 if (isMorePhotos) {
                     if (confirm('Do you want to go to another level?')) {
-                        this.image.src = this.photos[++this.currentLevel]
+                        this.changePuzzlePhoto()
                     } else {
-                        document.body.style.pointerEvents = 'none'
+                        this.canvas.style.pointerEvents = 'none'
                     }
                 } else {
                     alert('You won the whole game!')
-                    document.body.style.pointerEvents = 'none'
+                    this.canvas.style.pointerEvents = 'none'
+                    this.changeButtonAccessibility(this.shuffleBtn, false)
+                    this.changeButtonAccessibility(this.solveBtn, false)
+                    this.changeButtonAccessibility(this.newBtn, false)
                 }
             }, timeout)
         })
@@ -89,7 +94,7 @@ class PuzzleGame {
     }
 
     onMouseUp = () => {
-        if (this.selectedPiece.isClose()) {
+        if (this.selectedPiece && this.selectedPiece.isClose()) {
             this.selectedPiece.placeIntoRightPosition()
             this.popSound.play()
             if (this.isComplete()) {
@@ -119,12 +124,29 @@ class PuzzleGame {
         }
     }
 
+    changeButtonAccessibility = (button, state) => {
+        button.setAttribute('disabled', state)
+    }
+
+    changePuzzlePhoto = () => {
+        const isMorePhotos = this.currentLevel < this.photos.length - 1
+        if (isMorePhotos) {
+            this.image.src = this.photos[++this.currentLevel]
+        } else {
+            alert('There is no more puzzles!')
+            this.changeButtonAccessibility(this.newBtn, false)
+            this.changeButtonAccessibility(this.shuffleBtn, false)
+            this.changeButtonAccessibility(this.solveBtn, false)
+        }
+    }
+
     initEventListeners = () => {
         this.canvas.addEventListener('mousedown', this.onMouseDown)
         this.canvas.addEventListener('mousemove', this.onMouseMove)
         this.canvas.addEventListener('mouseup', this.onMouseUp)
         this.solveBtn.addEventListener('click', this.solvePuzzle)
         this.shuffleBtn.addEventListener('click', this.randomizePieces)
+        this.newBtn.addEventListener('click', this.changePuzzlePhoto)
     }
 
     handleResize = () => {
@@ -183,10 +205,10 @@ class PuzzleGame {
             this.handleResize()
             this.initializePieces(_rows, _columns)
             this.randomizePieces()
-            this.updateGame()
         }
 
         this.image.src = this.photos[this.currentLevel]
+        this.updateGame()
     }
 }
 
