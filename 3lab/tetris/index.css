@@ -8,36 +8,4 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-sizing: border-box;
-}
-
-.container {
-  position: relative;
-}
-
-.left-side-blocks {
-  position: absolute;
-  left: -48px;
-  top: 0;
-}
-
-.bottom-side-blocks {
-  position: absolute;
-  bottom: -43px;
-  left: 0;
-  display: flex;
-}
-
-.right-side-blocks {
-  position: absolute;
-  right: -48px;
-  top: 0;
-}
-
-.block {
-  box-sizing: border-box;
-  width: 48px;
-  height: 48px;
-  background-color: red;
-  border: 1px solid green;
 }
