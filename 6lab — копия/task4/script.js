@@ -90,8 +90,11 @@ class Ripples {
   }
 
   setupPointerEvents() {
-    this.ripplesElement.addEventListener('mousedown', ({ pageX, pageY }) =>
-      this.drop(pageX, pageY)
+    this.ripplesElement.addEventListener(
+      'mousedown',
+      ({ pageX, pageY }) => this.drop(pageX, innerHeight - pageY)
+
+      // this.drop(pageX, pageY)
     )
   }
 

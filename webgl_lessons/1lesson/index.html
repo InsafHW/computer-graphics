@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script defer src="./index.js"></script>
+    <style>
+      /* убираем границу */
+      body {
+        border: 0;
+        background-color: white;
+        overflow: hidden;
+      }
+      /* растягиваем canvas на всю область просмотра */
+      canvas {
+        width: 100vw;
+        height: 100vh;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <script id="vertex-shader-2d" type="x-shader/x-vertex">
+      attribute vec2 a_position;
+
+      uniform mat3 u_matrix;
+
+      void main() {
+        float R = (1.0 + sin(a_position.x)) * (1.0 + 0.9 * cos(8.0*a_position.x)) * (1.0 + 0.1*cos(24.0*a_position.x)) * (0.5 + 0.05*cos(140.0*a_position.x));
+        // Multiply the position by the matrix.
+        gl_Position = vec4((u_matrix * vec3(R * a_position.x, R * a_position.y, 1)).xy, 0, 1);
+      }
+    </script>
+    <!-- fragment shader -->
+    <script id="fragment-shader-2d" type="x-shader/x-fragment">
+      precision mediump float;
+
+      uniform vec4 u_color;
+
+      void main() {
+         gl_FragColor = u_color;
+      }
+    </script>
+    <script id="vertex-shader-2d" type="notjs">
+
+      // атрибут, который будет получать данные из буфера
+      attribute vec4 a_position;
+
+      // все шейдеры имеют функцию main
+      void main() {
+
+        // gl_Position - специальная переменная вершинного шейдера,
+        // которая отвечает за установку положения
+        gl_Position = a_position;
+      }
+    </script>
+
+    <script id="fragment-shader-2d" type="notjs">
+
+      // фрагментные шейдеры не имеют точности по умолчанию, поэтому нам необходимо её
+      // указать. mediump подойдёт для большинства случаев. Он означает "средняя точность"
+      precision mediump float;
+
+      void main() {
+        // gl_FragColor - специальная переменная фрагментного шейдера.
+        // Она отвечает за установку цвета.
+        gl_FragColor = vec4(1, 0, 0.5, 1); // вернёт красновато-фиолетовый
+      }
+    </script>
+  </body>
+</html>

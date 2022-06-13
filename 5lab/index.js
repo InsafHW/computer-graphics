@@ -44,6 +44,8 @@ function _createLights() {
 
 function _createControls() {
   controls = new OrbitControls(camera, renderer.domElement)
+  controls.target.set(0, 0, 0)
+
   controls.enableDamping = true
   controls.dampingFactor = 0.05
 }
@@ -55,7 +57,7 @@ function _createTextureLoader() {
 function _createBackground() {
   const geometry = new THREE.SphereGeometry(2000, 100, 100)
   const material = new THREE.MeshStandardMaterial({
-    map: textureLoader.load('../assets/stars_milky_way.jpg'),
+    map: textureLoader.load('./assets/stars_milky_way.jpg'),
     side: THREE.DoubleSide,
   })
   const background = new THREE.Mesh(geometry, material)
@@ -65,7 +67,7 @@ function _createBackground() {
 function _createTheSun() {
   const material = new THREE.MeshStandardMaterial({
     emissive: 0xffd700,
-    emissiveMap: textureLoader.load('../assets/sun/8k_sun.jpg'),
+    emissiveMap: textureLoader.load('./assets/sun/8k_sun.jpg'),
     emissiveIntensity: 1,
   })
   const geometry = new THREE.SphereGeometry(109, 40, 20)
@@ -83,9 +85,9 @@ function _createEarthSystem() {
 
   ;(function createEarth() {
     // create earth
-    const earthColor = textureLoader.load('../assets/earth/earthmap1k.jpg')
-    const earthBump = textureLoader.load('../assets/earth/earthbump1k.jpg')
-    const earthSpec = textureLoader.load('../assets/earth/earthspec1k.jpg')
+    const earthColor = textureLoader.load('./assets/earth/earthmap1k.jpg')
+    const earthBump = textureLoader.load('./assets/earth/earthbump1k.jpg')
+    const earthSpec = textureLoader.load('./assets/earth/earthspec1k.jpg')
 
     const geometry = new THREE.SphereGeometry(earthRadius, segments, segments)
     geometry.thetaStart = earthTiltRad
@@ -111,7 +113,7 @@ function _createEarthSystem() {
       segments
     )
     const material = new THREE.MeshPhongMaterial({
-      map: textureLoader.load('../assets/earth/earthcloudmaptrans.jpg'),
+      map: textureLoader.load('./assets/earth/earthcloudmaptrans.jpg'),
       transparent: true,
       opacity: 0.5,
     })
@@ -125,8 +127,8 @@ function _createEarthSystem() {
     // create the Moon
     const geometry = new THREE.SphereGeometry(5, 40, 20)
     const material = new THREE.MeshStandardMaterial({
-      map: textureLoader.load('../assets/moon/moonmap1k.jpg'),
-      bumpMap: textureLoader.load('../assets/moon/moonbump1k.jpg'),
+      map: textureLoader.load('./assets/moon/moonmap1k.jpg'),
+      bumpMap: textureLoader.load('./assets/moon/moonbump1k.jpg'),
       bumpScale: 0.5,
     })
     const theMoon = new THREE.Mesh(geometry, material)

@@ -1,0 +1,3 @@
+uniform are per-primitive parameters (constant during an entire draw call) ;
+attribute are per-vertex parameters (typically : positions, normals, colors, UVs, ...) ;
+varying are per-fragment (or per-pixel) parameters : they vary from pixels to pixels.

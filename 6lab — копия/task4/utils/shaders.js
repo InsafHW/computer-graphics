@@ -1,4 +1,7 @@
 function getDefaultVertexShader() {
+  // attribute – данные, которые передаются в вершинный шейдер и относятся к каждой обрабатываемой вершине.
+  // varying – используется для передачи интерполированных значений между фрагменты и вершинным шейдерами.
+  // Доступны для записи в вершинном (vertex) шейдере и только для чтения во фрагментном (fragment) шейдере.
   return [
     'attribute vec2 vertex;',
     'varying vec2 coord;',
@@ -22,9 +25,9 @@ function getRenderProgramVertexShader() {
     'varying vec2 backgroundCoord;',
     'void main() {',
     'backgroundCoord = mix(topLeft, bottomRight, vertex * 0.5 + 0.5);',
-    'backgroundCoord.y = 1.0 - backgroundCoord.y;',
+    // 'backgroundCoord.y = 1.0 - backgroundCoord.y;',
     'ripplesCoord = vec2(vertex.x, -vertex.y) * containerRatio * 0.5 + 0.5;',
-    'gl_Position = vec4(vertex.x, -vertex.y, 0.0, 1.0);',
+    'gl_Position = vec4(vertex.x, vertex.y, 0.0, 1.0);',
     '}',
   ].join('\n')
 }

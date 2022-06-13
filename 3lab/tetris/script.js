@@ -1,9 +1,20 @@
 import { getRandomArrayItem, getRandomRgba, rotate } from './utils.js'
 import { tetrominos, tetrominoNames } from './tetrominos.js'
+import {
+  levelsConditionMap,
+  SCORES_FOR_DELETE_ROWS,
+  LEVEL_PASSED_MULTIPLIER,
+} from './rules.js'
 
-const playfield = []
-
-// заполняем сразу массив пустыми ячейками
+const BLOCK_SIZE = 48
+const COLUMNS_COUNT = 10
+const ROWS_COUNT = 20
+const canvas = document.getElementById('game')
+const context = canvas.getContext('2d')
+const gameOverSound = new Audio('./assets/sounds/game-over.mp3')
+const stageClearSound = new Audio('./assets/sounds/stage-clear.mp3')
+const popSound = new Audio('./assets/sounds/pop.mp3')
+const newLevelSound = new Audio('./assets/sounds/new-level.mp3')
 
 const gameState = {
   pause: false,
@@ -11,18 +22,31 @@ const gameState = {
   animationFrame: null,
   tetromino: null,
   nextTetromino: null,
-  gameFps: 35,
+  gameFps: levelsConditionMap.get(1),
   score: 0,
   playfield: [],
   level: 1,
+  count: 0,
+  destroyedLinesCount: 0,
 }
 
 function init() {
-  for (let row = -2; row < 20; row++) {
+  gameState.score = 0
+  gameState.gameOver = false
+  gameState.pause = false
+  gameState.level = 1
+  gameState.count = 0
+  gameState.gameFps = levelsConditionMap.get(1).levelFps
+  gameState.destroyedLinesCount = 0
+  gameState.animationFrame = requestAnimationFrame(loop)
+
+  const { playfield } = gameState
+
+  for (let row = -2; row < ROWS_COUNT; row++) {
     playfield[row] = []
 
-    for (let col = 0; col < 10; col++) {
-      playfield[row][col] = 0
+    for (let col = 0; col < COLUMNS_COUNT; col++) {
+      playfield[row][col] = ''
     }
   }
 
@@ -47,38 +71,34 @@ function init() {
     color: getRandomRgba(),
   }
 }
-init()
-
-const grid = 48
-
-const canvas = document.getElementById('game')
-const context = canvas.getContext('2d')
 
 function drawSides() {
-  context.lineWidth = 1
   context.strokeStyle = 'green'
   context.fillStyle = 'violet'
 
-  for (let i = 0; i < 20 + 1; i++) {
-    context.strokeRect(0, i * grid, grid, grid)
-    context.fillRect(1, 1 + i * grid, 46, 46)
+  for (let i = 0; i < ROWS_COUNT + 1; i++) {
+    context.strokeRect(0, i * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
+    context.fillRect(1, 1 + i * BLOCK_SIZE, 46, 46)
 
-    context.strokeRect(530 + 1, i * grid, grid, grid)
-    context.fillRect(530 + 2, 1 + i * grid, 46, 46)
+    context.strokeRect(530 + 1, i * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE)
+    context.fillRect(530 + 2, 1 + i * BLOCK_SIZE, 46, 46)
 
     if (i < 10) {
-      context.strokeRect(50 + i * grid, 960, grid, 48)
-      context.fillRect(50 + i * grid + 1, 960 + 1, 46, 46)
+      context.strokeRect(50 + i * BLOCK_SIZE, 960, BLOCK_SIZE, 48)
+      context.fillRect(50 + i * BLOCK_SIZE + 1, 960 + 1, 46, 46)
     }
   }
 }
 
 function drawInfoSection() {
   const { level, score, nextTetromino } = gameState
+  const linesLeft =
+    levelsConditionMap.get(gameState.level).linesToDestroy -
+    gameState.destroyedLinesCount
   context.font = '24px Arial'
   context.fillStyle = 'black'
   context.fillText(`Level: ${level}`, 650, 200)
-  context.fillText('Lines left: N', 650, 250)
+  context.fillText(`Lines left: ${linesLeft}`, 650, 250)
   context.fillText(`Score: ${score}`, 650, 300)
   context.fillText('Next: ', 650, 350)
 
@@ -87,26 +107,18 @@ function drawInfoSection() {
     for (let col = 0; col < nextTetromino.matrix[row].length; col++) {
       if (nextTetromino.matrix[row][col]) {
         context.fillRect(
-          (col * grid) / 2 + 720,
-          (row * grid) / 2 + 320,
-          grid / 2 - 1,
-          grid / 2 - 1
+          (col * BLOCK_SIZE) / 2 + 720,
+          (row * BLOCK_SIZE) / 2 + 320,
+          BLOCK_SIZE / 2 - 1,
+          BLOCK_SIZE / 2 - 1
         )
       }
     }
   }
 }
-const SCORES_FOR_DELETE_ROWS = {
-  1: 10,
-  2: 30,
-  3: 70,
-  4: 150,
-}
-
-// счётчик
-let count = 0
 
 function getNextTetromino() {
+  const { playfield } = gameState
   const prevTetromino = { ...gameState.nextTetromino }
 
   const name = getRandomArrayItem(tetrominoNames)
@@ -123,18 +135,18 @@ function getNextTetromino() {
 }
 
 function isValidMove(matrix, cellRow, cellCol) {
+  const { playfield } = gameState
+
   for (let row = 0; row < matrix.length; row++) {
     for (let col = 0; col < matrix[row].length; col++) {
-      if (
-        matrix[row][col] &&
-        // если выходит за границы поля…
-        (cellCol + col < 0 ||
-          cellCol + col >= playfield[0].length ||
-          cellRow + row >= playfield.length ||
-          // …или пересекается с другими фигурами
-          playfield[cellRow + row][cellCol + col])
-      ) {
-        // то возвращаем, что нет, так не пойдёт
+      const hasBlock = matrix[row][col]
+      const isLeftOut = cellCol + col < 0
+      const isRightOut = cellCol + col >= playfield[0].length
+      const isBottomOut = cellRow + row >= playfield.length
+      const isOutOfPlayfield = isLeftOut || isRightOut || isBottomOut
+      const intersectsWithOtherBlocks =
+        isBottomOut || playfield[cellRow + row][cellCol + col]
+      if (hasBlock && (isOutOfPlayfield || intersectsWithOtherBlocks)) {
         return false
       }
     }
@@ -143,44 +155,66 @@ function isValidMove(matrix, cellRow, cellCol) {
 }
 
 function placeTetromino() {
-  const { tetromino } = gameState
+  popSound.play()
+  const { tetromino, playfield } = gameState
   for (let row = 0; row < tetromino.matrix.length; row++) {
     for (let col = 0; col < tetromino.matrix[row].length; col++) {
       if (tetromino.matrix[row][col]) {
-        // если край фигуры после установки вылезает за границы поля, то игра закончилась
-        if (tetromino.row + row < 0) {
+        const isOutOfPlayfield = tetromino.row + row < 0
+        if (isOutOfPlayfield) {
           return showGameOver()
         }
-        // если всё в порядке, то записываем в массив игрового поля нашу фигуру
-        playfield[tetromino.row + row][tetromino.col + col] = {
-          name: tetromino.name,
-          color: tetromino.color,
-        }
+        playfield[tetromino.row + row][tetromino.col + col] = tetromino.color
       }
     }
   }
 
-  // проверяем, чтобы заполненные ряды очистились снизу вверх
   let deletedRowsCount = 0
   for (let row = playfield.length - 1; row >= 0; ) {
-    // если ряд заполнен
     const rowFullyFilled = playfield[row].every((cell) => !!cell)
     if (rowFullyFilled) {
       deletedRowsCount++
-      // очищаем его и опускаем всё вниз на одну клетку
       for (let r = row; r >= 0; r--) {
         for (let c = 0; c < playfield[r].length; c++) {
           playfield[r][c] = playfield[r - 1][c]
         }
       }
     } else {
-      // переходим к следующему ряду
       row--
     }
   }
-  if (deletedRowsCount) {
+
+  if (deletedRowsCount > 0) {
+    gameState.destroyedLinesCount += deletedRowsCount
+    const finishedLevel =
+      gameState.destroyedLinesCount >=
+      levelsConditionMap.get(gameState.level).linesToDestroy
+    if (finishedLevel) {
+      newLevelSound.play()
+      gameState.level++
+      gameState.gameFps = levelsConditionMap.get(gameState.level).levelFps
+
+      let clearRowsCount = 0
+      for (let row = 0; row < ROWS_COUNT; row++) {
+        let rowEmpty = true
+        for (let col = 0; col < COLUMNS_COUNT; col++) {
+          if (gameState.playfield[row][col]) {
+            rowEmpty = false
+            gameState.playfield[row][col] = ''
+          }
+        }
+        if (rowEmpty) {
+          clearRowsCount++
+        }
+      }
+      gameState.destroyedLinesCount = 0
+      gameState.score += clearRowsCount * LEVEL_PASSED_MULTIPLIER
+    } else {
+      stageClearSound.play()
+    }
     gameState.score += SCORES_FOR_DELETE_ROWS[deletedRowsCount]
   }
+
   gameState.tetromino = getNextTetromino()
 }
 
@@ -196,18 +230,13 @@ function showModalMessage(message) {
   context.fillText(message, 580 / 2, canvas.height / 2)
 }
 
-// показываем надпись Game Over
 function showGameOver() {
+  gameOverSound.play()
   cancelAnimationFrame(gameState.animationFrame)
   gameState.gameOver = true
   showModalMessage('Game over')
-  if (confirm('Начать занового?')) {
+  if (confirm('Начать заново?')) {
     init()
-    gameState.score = 0
-    gameState.gameOver = false
-    gameState.pause = false
-    gameState.level = 1
-    gameState.animationFrame = requestAnimationFrame(loop)
   } else {
     window.close()
   }
@@ -223,22 +252,28 @@ function loop() {
   drawInfoSection()
   drawSides()
 
-  for (let row = 0; row < 20; row++) {
-    for (let col = 0; col < 10; col++) {
-      if (playfield[row][col].name) {
-        context.fillStyle = playfield[row][col].color
-        context.fillRect(col * grid + 50, row * grid, grid - 1, grid - 1)
+  const { playfield } = gameState
+
+  for (let row = 0; row < ROWS_COUNT; row++) {
+    for (let col = 0; col < COLUMNS_COUNT; col++) {
+      if (playfield[row][col]) {
+        context.fillStyle = playfield[row][col]
+        context.fillRect(
+          col * BLOCK_SIZE + 50,
+          row * BLOCK_SIZE,
+          BLOCK_SIZE - 1,
+          BLOCK_SIZE - 1
+        )
       }
     }
   }
 
   const { tetromino } = gameState
   if (tetromino) {
-    if (++count > gameState.gameFps) {
+    if (++gameState.count > gameState.gameFps) {
       tetromino.row++
-      count = 0
+      gameState.count = 0
 
-      // если движение закончилось — рисуем фигуру в поле и проверяем, можно ли удалить строки
       if (!isValidMove(tetromino.matrix, tetromino.row, tetromino.col)) {
         tetromino.row--
         placeTetromino()
@@ -250,10 +285,10 @@ function loop() {
       for (let col = 0; col < tetromino.matrix[row].length; col++) {
         if (tetromino.matrix[row][col]) {
           context.fillRect(
-            (tetromino.col + col) * grid + 50,
-            (tetromino.row + row) * grid,
-            grid - 1,
-            grid - 1
+            (tetromino.col + col) * BLOCK_SIZE + 50,
+            (tetromino.row + row) * BLOCK_SIZE,
+            BLOCK_SIZE - 1,
+            BLOCK_SIZE - 1
           )
         }
       }
@@ -303,4 +338,4 @@ document.addEventListener('keydown', function (e) {
   }
 })
 
-gameState.animationFrame = requestAnimationFrame(loop)
+init()
